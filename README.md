@@ -1,1 +1,1 @@
-# Trabalho DevOps sobre GitHub Actions/n/nActions criadas: /n- Primeira para Hello Word./n/n## Changelog/n/n- **fix** (2026-10-16 · aa0b860): ajuste no changelog type/n
+# Trabalho DevOps sobre GitHub Actions/n/nActions criadas:
