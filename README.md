@@ -1,5 +1,9 @@
 # Trabalho DevOps sobre GitHub Actions
 
+<!-- download:start -->
+[Baixar o repositório (.zip)](https://github.com/MatrCastelini23/trabalho-devops-2bimestre/releases/download/latest/trabalho-devops-2bimestre.zip)
+<!-- download:end -->
+
 Actions criadas:
 - Basica para Hello World
 - Changelog para cada commit para atualizar o README.md
