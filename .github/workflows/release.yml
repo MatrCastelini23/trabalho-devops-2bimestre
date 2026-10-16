@@ -1,0 +1,76 @@
+name: release
+
+on:
+  workflow_run:
+    workflows: [changelog]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    # Só roda se o changelog terminou com sucesso (ou se for disparado manualmente)
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      REPO_NAME: ${{ github.event.repository.name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # pega o commit mais recente da branch, já com o README atualizado pelo changelog
+          ref: ${{ github.event.workflow_run.head_branch || github.ref_name }}
+
+      - name: Atualizar link do zip no README
+        env:
+          ZIP_URL: https://github.com/${{ github.repository }}/releases/download/latest/${{ github.event.repository.name }}.zip
+        run: |
+          python3 - <<'EOF'
+          import os, re
+
+          url = os.environ["ZIP_URL"]
+          block = (
+              "<!-- download:start -->\n"
+              "[Baixar o repositório (.zip)]({})\n"
+              "<!-- download:end -->"
+          ).format(url)
+
+          with open("README.md", encoding="utf-8") as f:
+              text = f.read()
+
+          pattern = re.compile(r"<!-- download:start -->.*?<!-- download:end -->", re.DOTALL)
+
+          if pattern.search(text):
+              text = pattern.sub(lambda m: block, text)
+          else:
+              # primeira vez: insere logo após a primeira linha (título)
+              first, _, rest = text.partition("\n")
+              text = first + "\n\n" + block + "\n" + rest
+
+          with open("README.md", "w", encoding="utf-8") as f:
+              f.write(text)
+          EOF
+
+      - name: Commit README
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet && exit 0
+          git commit -m "docs: adiciona link do zip [skip ci]"
+          git push
+
+      - name: Zipar o repositório
+        run: git archive --format=zip --prefix="${REPO_NAME}/" -o "${REPO_NAME}.zip" HEAD
+
+      - name: Publicar zip na release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # recria a release "latest" a cada execução para o link ficar sempre fixo
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest "${REPO_NAME}.zip" \
+            --title "Última versão" \
+            --notes "Zip gerado automaticamente a partir do commit ${GITHUB_SHA::7}." \
+            --target "$(git rev-parse HEAD)"
