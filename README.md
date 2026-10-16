@@ -1,4 +1,8 @@
-# Trabalho DevOps sobre GitHub Actions/n/nActions criadas:
+# Trabalho DevOps sobre GitHub Actions
+
+Actions criadas:
+- Basica para Hello World
+- Changelog para cada commit para atualizar o README.md
 
 ## Changelog
 
