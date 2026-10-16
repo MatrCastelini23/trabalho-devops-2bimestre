@@ -6,6 +6,7 @@ Actions criadas:
 - Para zipar o conteudo do repositorio e disponibilizar para download
 
 ## Changelog
+- **dev** (2026-10-16 · 3d15cfc): Adição da actions de release para disponibilizar o repo zipado
 - **dev** (2026-10-16 · 7de0f8b): adição da actions de changelog no readme
 
 - **fix** (2026-10-16 · 7053220): ajuste na quebra de linha no update README
