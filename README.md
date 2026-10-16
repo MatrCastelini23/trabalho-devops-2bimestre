@@ -5,5 +5,6 @@ Actions criadas:
 - Changelog para cada commit para atualizar o README.md
 
 ## Changelog
+- **dev** (2026-10-16 · 7de0f8b): adição da actions de changelog no readme
 
 - **fix** (2026-10-16 · 7053220): ajuste na quebra de linha no update README
