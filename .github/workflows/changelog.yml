@@ -22,7 +22,7 @@ jobs:
 
           if [["$FIRST_WORD" != *:]]; then
             echo "Mensagem fora do padrão 'tipo: descrição', sendo ignorado."
-            echo "valid=false" >> $GITHUB_OUTPUT"
+            echo "valid=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -42,7 +42,7 @@ jobs:
           CL_TYPE: ${{ steps.type.outputs.type }}
           CL_CONTENT: ${{ steps.content.outputs.content }}
         run: | 
-          python3 - << 'EOF'
+          python3 - <<'EOF'
           import os, datetime
 
           entry = "- **{}** ({} · {}): {}".format(
