@@ -1,0 +1,79 @@
+# Este workflow só aceitará commits no formato tipo: descrição
+name: changelog
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Define o tipo do changelog
+      - name: Changelog Type
+        id: type
+        run: |
+          MSG="$(git log -1 --pretty=%s)"
+          FIRST_WORD="${MSG%% *}"
+
+          if [["$FIRST_WORD" != *:]]; then
+            echo "Mensagem fora do padrão 'tipo: descrição', sendo ignorado."
+            echo "valid=false" >> $GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+          echo "type=${FIRST_WORD%:}" >> "$GITHUB_OUTPUT"
+      
+      - name: Changelog Content
+        id: content
+        if: steps.type.outputs.valid == 'true'
+        run: | 
+          MSG="$(git log -1 --pretty=%s)"
+          echo "content=${MSG#* }" >> "$GITHUB_OUTPUT"
+
+      - name: Update README
+        if: steps.type.outputs.valid == 'true'
+        env: 
+          CL_TYPE: ${{ steps.type.outputs.type }}
+          CL_CONTENT: ${{ steps.content.outputs.content }}
+        run: | 
+          python3 - << 'EOF'
+          import os, datetime
+
+          entry = "- **{}** ({} · {}): {}".format(
+              os.environ["CL_TYPE"],
+              datetime.date.today().isoformat(),
+              os.environ["GITHUB_SHA"][:7],
+              os.environ["CL_CONTENT"],
+          )
+
+          with open("README.md", encoding="utf-8") as f:
+              lines = f.read().split("\n")
+
+          for i, line in enumerate(lines):
+            if line.strip().lower() == "## changelog":
+              lines.insert(i + 1, entry)
+              break
+          else: 
+            if lines and lines[-1] != "":
+              lines.append("")
+            lines += ["## Changelog", "", entry, ""]
+          
+          with open("README.md", "w", encoding="utf-8") as f: 
+            f.write("/n".join(lines))
+          EOF
+      
+      - name: Commit README
+        if: steps.type.outputs.valid == 'true'
+        run: | 
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@user.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet && exit 0
+          git commit -m "docs: atualiza changelog [skip ci]"
+          git push

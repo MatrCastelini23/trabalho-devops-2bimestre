@@ -1,2 +1,4 @@
-# trabalho-devops-2bimestre
-Trabalho sobre Actions checkout@v4
+# Trabalho DevOps sobre GitHub Actions
+
+Actions criadas: 
+- Primeira para Hello Word.
